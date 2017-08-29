@@ -1062,6 +1062,8 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
 static void *push_to_guest(void *nc){
     printf("Push thread created\n");
     sleep(5);
+    E1000State *s = nc;
+    PCIDevice *d = PCI_DEVICE(s);
     while(1){
         pthread_mutex_lock(&list_lock);
         if (list_len < pushed_len){
@@ -1070,11 +1072,10 @@ static void *push_to_guest(void *nc){
             continue; 
         }
 
-        while(list_len >= pushed_len){
+        while(list_len > pushed_len){
             printf("In while Loop\n");
             fflush(stdout);
-            E1000State *s = qemu_get_nic_opaque((NetClientState *)nc);
-            PCIDevice *d = PCI_DEVICE(s);
+            
             struct e1000_rx_desc desc;
             dma_addr_t base;
             unsigned int n, rdt;
