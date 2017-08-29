@@ -1194,15 +1194,14 @@ static void *push_to_guest(void *nc){
             pushed_len++;
             if (pushed_len >= iov_list_maxlen)
                 pushed_len -= iov_list_maxlen; 
+            printf("Pushed to guest vm, pushed_len = %d\n", pushed_len);
+
 
         }
-        printf("Pushed to guest vm, pushed_len = %d\n", pushed_len);
         pthread_mutex_unlock(&list_lock);
         sched_yield();
 
     }
-    printf("Before return\n");
-            fflush(stdout);
 }
 
 
