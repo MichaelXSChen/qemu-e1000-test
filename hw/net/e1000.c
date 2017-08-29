@@ -352,6 +352,10 @@ e1000_autoneg_timer(void *opaque)
 
 static void e1000_reset(void *opaque)
 {
+
+
+    printf("calling e1000 reset\n");
+
     E1000State *d = opaque;
     E1000BaseClass *edc = E1000_DEVICE_GET_CLASS(d);
     uint8_t *macaddr = d->conf.macaddr.a;
@@ -910,6 +914,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
     if( list_len >= iov_list_maxlen){
         list_len -= iov_list_maxlen;
     }
+    printf("pushed to buffer, list_len =%d \n",list_len);
 
     pthread_mutex_unlock(&list_lock);
 
@@ -1157,7 +1162,10 @@ static void *push_to_guest(void *nc){
                     DBGOUT(RXERR, "RDH wraparound @%x, RDT %x, RDLEN %x\n",
                            rdh_start, s->mac_reg[RDT], s->mac_reg[RDLEN]);
                     set_ics(s, 0, E1000_ICS_RXO);
-                    return -1;
+                    pushed_len++; 
+                    if (pushed_len >= iov_list_maxlen)
+                    pushed_len -= iov_list_maxlen; 
+                    continue;
                 }
             } while (desc_offset < total_size);
 
