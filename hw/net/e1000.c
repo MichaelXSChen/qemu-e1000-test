@@ -855,7 +855,7 @@ static ssize_t
 e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
 {
     E1000State *s = qemu_get_nic_opaque(nc);
-    PCIDevice *d = PCI_DEVICE(s);
+    //PCIDevice *d = PCI_DEVICE(s);
     // struct e1000_rx_desc desc;
     // dma_addr_t base;
     // unsigned int n, rdt;
@@ -1057,7 +1057,7 @@ static void *push_to_guest(void *nc){
         }
 
         while(list_len >= pushed_len){
-            E1000State *s = qemu_get_nic_opaque((*NetClientState)nc);
+            E1000State *s = qemu_get_nic_opaque((NetClientState *)nc);
             PCIDevice *d = PCI_DEVICE(s);
             struct e1000_rx_desc desc;
             dma_addr_t base;
@@ -1065,10 +1065,10 @@ static void *push_to_guest(void *nc){
             uint32_t rdh_start;
             uint16_t vlan_special = 0;
             uint8_t vlan_status = 0;
-            uint8_t min_buf[MIN_BUF_SIZE];
-            struct iovec min_iov;
+            //uint8_t min_buf[MIN_BUF_SIZE];
+            //struct iovec min_iov;
             
-            uint8_t *filter_buf = iov_list[pushed_len]->iov_base;
+            //uint8_t *filter_buf = iov_list[pushed_len]->iov_base;
             size_t size = iov_size(iov_list[pushed_len], 1);
             
             size_t iov_ofs = 0;
