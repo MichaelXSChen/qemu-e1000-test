@@ -1065,11 +1065,13 @@ static void *push_to_guest(void *nc){
             uint32_t rdh_start;
             uint16_t vlan_special = 0;
             uint8_t vlan_status = 0;
-            //uint8_t min_buf[MIN_BUF_SIZE];
-            //struct iovec min_iov;
-            
-            //uint8_t *filter_buf = iov_list[pushed_len]->iov_base;
-            size_t size = iov_size(iov_list[pushed_len], 1);
+           
+            struct iovec* iov = &(iov_list[pushed_len]);
+            int iovcnt = 1; 
+
+
+
+            size_t size = iov_size(iov, 1);
             
             size_t iov_ofs = 0;
             size_t desc_offset;
@@ -1077,8 +1079,7 @@ static void *push_to_guest(void *nc){
             size_t total_size;
 
 
-            struct iovec* iov = iov_list[pushed_len];
-            int iovcnt = 1; 
+            
 
 
             rdh_start = s->mac_reg[RDH];
