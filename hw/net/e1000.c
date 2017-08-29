@@ -910,7 +910,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
         iov_list[list_len].iov_base = buf; 
         iov_list[list_len++].iov_len=iov[i].iov_len;
         if( list_len >= iov_list_maxlen){
-            iov_len -= iov_list_maxlen;
+            list_len -= iov_list_maxlen;
         }
         pthread_mutex_unlock(&list_lock);
     }
