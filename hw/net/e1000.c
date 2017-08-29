@@ -862,6 +862,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
     // uint32_t rdh_start;
     // uint16_t vlan_special = 0;
     // uint8_t vlan_status = 0;
+    uint8_t *filter_buf = iov->iov_base;
     uint8_t min_buf[MIN_BUF_SIZE];
     struct iovec min_iov;
     size_t size = iov_size(iov, iovcnt);
