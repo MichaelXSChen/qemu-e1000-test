@@ -861,6 +861,7 @@ static pthread_mutex_t list_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static struct iovec iov_list[iov_list_maxlen]; 
 static int list_len = 0; 
+static int list_wrap = 0;
 
 static int pushed_len = 0;  
 
@@ -922,6 +923,11 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
     iov_list[list_len++].iov_len = size; 
     if( list_len >= iov_list_maxlen){
         list_len -= iov_list_maxlen;
+        if (list_wrap == 0){
+            list_wrap = 1; 
+            printf("Append Wrap around",list_len);
+        }
+        
     }
     printf("Append to buffer, list_len =%d \n",list_len);
 
@@ -1072,7 +1078,7 @@ static void *push_to_guest(void *nc){
             continue; 
         }
 
-        while(list_len > pushed_len){
+        while(list_len > pushed_len || list_wrap == 1){
             printf("In while Loop\n");
             fflush(stdout);
             
@@ -1105,8 +1111,13 @@ static void *push_to_guest(void *nc){
             if (!e1000_has_rxbufs(s, total_size)) {
                     set_ics(s, 0, E1000_ICS_RXO);
                     pushed_len++; 
-                    if (pushed_len >= iov_list_maxlen)
-                    pushed_len -= iov_list_maxlen; 
+                    if (pushed_len >= iov_list_maxlen){
+                        pushed_len -= iov_list_maxlen; 
+                        if (list_wrap == 1){
+                            list_wrap = 0; 
+                            printf("Pushed around");
+                        }
+                    }
                     continue;
             }
 
@@ -1192,8 +1203,13 @@ static void *push_to_guest(void *nc){
 
             set_ics(s, 0, n);
             pushed_len++;
-            if (pushed_len >= iov_list_maxlen)
+            if (pushed_len >= iov_list_maxlen){
                 pushed_len -= iov_list_maxlen; 
+                if (list_wrap == 1){
+                    list_wrap = 0; 
+                    printf("push wrap around\n");
+                }
+            }
             printf("Pushed to guest vm, pushed_len = %d\n", pushed_len);
 
 
