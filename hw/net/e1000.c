@@ -841,11 +841,12 @@ static uint64_t rx_desc_base(E1000State *s)
 }
 
 
+#define iov_list_maxlen 65535
 
-// static pthread_mutex_t list_lock;
-// static struct iovec iov_list[65536]; 
-// static int list_len = 0; 
-// static int list_head = -1; 
+static pthread_mutex_t list_lock = PTHREAD_MUTEX_INITIALIZER;
+
+static struct iovec iov_list[iov_list_maxlen]; 
+static int list_len = 0;  
 
 static ssize_t
 e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
@@ -894,6 +895,29 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
     if (!receive_filter(s, filter_buf, size)) {
         return size;
     }
+
+
+    int i; 
+    for (i = 0; i<iovcnt; ++i){
+        void *buf = malloc(iov[i].iov_len); 
+
+        memcpy(buf, iov[i].buf, iov[i].iov_len); 
+        pthread_mutex_lock(&list_lock);
+
+        if (iov_list[list_len].buf != NULL){
+            free(iov_list[list_len].buf);
+        }
+        iov_list[list_len].buf = buf; 
+        iov_list[list_len++].iov_len=iov[i].iov_len;
+        if( list_len >= iov_list_maxlen){
+            iov_len -= iov_list_maxlen;
+        }
+        pthread_mutex_unlock(&list_lock);
+    }
+
+
+
+
 
     if (e1000x_vlan_enabled(s->mac_reg) &&
         e1000x_is_vlan_packet(filter_buf, le16_to_cpu(s->mac_reg[VET]))) {
