@@ -901,13 +901,13 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
     for (i = 0; i<iovcnt; ++i){
         void *buf = malloc(iov[i].iov_len); 
 
-        memcpy(buf, iov[i].buf, iov[i].iov_len); 
+        memcpy(buf, iov[i].iov_base, iov[i].iov_len); 
         pthread_mutex_lock(&list_lock);
 
-        if (iov_list[list_len].buf != NULL){
-            free(iov_list[list_len].buf);
+        if (iov_list[list_len].iov_base != NULL){
+            free(iov_list[list_len].iov_base);
         }
-        iov_list[list_len].buf = buf; 
+        iov_list[list_len].iov_base = buf; 
         iov_list[list_len++].iov_len=iov[i].iov_len;
         if( list_len >= iov_list_maxlen){
             iov_len -= iov_list_maxlen;
