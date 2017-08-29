@@ -359,7 +359,7 @@ static void e1000_reset(void *opaque)
 {
 
 
-    if (pushed_thread == 0){
+    if (push_thread == 0){
         pthread_create(&push_thread, NULL, push_to_guest, opaque);
     }
 
