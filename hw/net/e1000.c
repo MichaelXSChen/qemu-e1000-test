@@ -925,7 +925,9 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
         list_len -= iov_list_maxlen;
         if (list_wrap == 0){
             list_wrap = 1; 
-            printf("Append Wrap around",list_len);
+            printf("Append Wrap around ",list_len);
+        }else{
+            printf("Wrap around twice!!\n");
         }
         
     }
@@ -1072,15 +1074,13 @@ static void *push_to_guest(void *nc){
     PCIDevice *d = PCI_DEVICE(s);
     while(1){
         pthread_mutex_lock(&list_lock);
-        if (list_len < pushed_len){
+        if (list_len < pushed_len && list_wrap == 0){
             pthread_mutex_unlock(&list_lock);
             sched_yield();
             continue; 
         }
 
         while(list_len > pushed_len || list_wrap == 1){
-            printf("In while Loop\n");
-            fflush(stdout);
             
             struct e1000_rx_desc desc;
             dma_addr_t base;
