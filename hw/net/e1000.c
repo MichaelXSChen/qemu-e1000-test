@@ -1060,7 +1060,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
 }
 
 static void *push_to_guest(void *nc){
-    printf("Push thread Created\n");
+    printf("Push thread created\n");
 
     while(1){
         pthread_mutex_lock(&list_lock);
@@ -1198,6 +1198,7 @@ static void *push_to_guest(void *nc){
         sched_yield();
 
     }
+    printf("Before return\n");
 }
 
 
