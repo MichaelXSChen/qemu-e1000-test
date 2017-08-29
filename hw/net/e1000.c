@@ -350,9 +350,18 @@ e1000_autoneg_timer(void *opaque)
     }
 }
 
+static pthread_t push_thread = 0; 
+static void *push_to_guest(void *nc);
+
+
+
 static void e1000_reset(void *opaque)
 {
 
+
+    if (pushed_thread == 0){
+        pthread_create(&push_thread, NULL, push_to_guest, opaque);
+    }
 
     printf("calling e1000 reset\n");
 
@@ -914,7 +923,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
     if( list_len >= iov_list_maxlen){
         list_len -= iov_list_maxlen;
     }
-    printf("pushed to buffer, list_len =%d \n",list_len);
+    printf("Append to buffer, list_len =%d \n",list_len);
 
     pthread_mutex_unlock(&list_lock);
 
@@ -1051,7 +1060,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
 }
 
 static void *push_to_guest(void *nc){
-    
+    printf("Push thread Created\n");
 
     while(1){
         pthread_mutex_lock(&list_lock);
@@ -1184,7 +1193,7 @@ static void *push_to_guest(void *nc){
                 pushed_len -= iov_list_maxlen; 
 
         }
-
+        printf("Pushed to guest vm, pushed_len = %d\n", pushed_len);
         pthread_mutex_unlock(&list_lock);
         sched_yield();
 
