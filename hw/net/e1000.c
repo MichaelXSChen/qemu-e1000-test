@@ -854,7 +854,7 @@ static uint64_t rx_desc_base(E1000State *s)
 }
 
 
-#define iov_list_maxlen 65535
+#define iov_list_maxlen 33554432 // 32MB Buffer
 
 static pthread_mutex_t list_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -925,13 +925,11 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
         list_len -= iov_list_maxlen;
         if (list_wrap == 0){
             list_wrap = 1; 
-            printf("Append Wrap around ",list_len);
-        }else{
-            printf("Wrap around twice!!\n");
+            //printf("Append Wrap around ",list_len);
         }
         
     }
-    printf("Append to buffer, list_len =%d \n",list_len);
+    //printf("Append to buffer, list_len =%d \n",list_len);
 
     pthread_mutex_unlock(&list_lock);
 
@@ -1115,7 +1113,7 @@ static void *push_to_guest(void *nc){
                         pushed_len -= iov_list_maxlen; 
                         if (list_wrap == 1){
                             list_wrap = 0; 
-                            printf("Pushed around");
+                            //printf("Pushed around");
                         }
                     }
                     continue;
@@ -1207,15 +1205,15 @@ static void *push_to_guest(void *nc){
                 pushed_len -= iov_list_maxlen; 
                 if (list_wrap == 1){
                     list_wrap = 0; 
-                    printf("push wrap around\n");
+                    //printf("push wrap around\n");
                 }
             }
-            printf("Pushed to guest vm, pushed_len = %d\n", pushed_len);
+            //printf("Pushed to guest vm, pushed_len = %d\n", pushed_len);
 
 
         }
         pthread_mutex_unlock(&list_lock);
-        sched_yield();
+        //sched_yield();
 
     }
 }
