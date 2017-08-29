@@ -1071,6 +1071,8 @@ static void *push_to_guest(void *nc){
         }
 
         while(list_len >= pushed_len){
+            printf("In while Loop\n");
+            fflush(stdout);
             E1000State *s = qemu_get_nic_opaque((NetClientState *)nc);
             PCIDevice *d = PCI_DEVICE(s);
             struct e1000_rx_desc desc;
@@ -1199,6 +1201,7 @@ static void *push_to_guest(void *nc){
 
     }
     printf("Before return\n");
+            fflush(stdout);
 }
 
 
