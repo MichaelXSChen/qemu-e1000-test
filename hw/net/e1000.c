@@ -854,7 +854,7 @@ static uint64_t rx_desc_base(E1000State *s)
 }
 
 
-#define iov_list_maxlen 33554432 // 32MB Buffer
+#define iov_list_maxlen 3355443200 // 32MB Buffer
 
 static pthread_mutex_t list_lock = PTHREAD_MUTEX_INITIALIZER;
 
