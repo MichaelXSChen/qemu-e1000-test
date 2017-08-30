@@ -1078,7 +1078,7 @@ static void *push_to_guest(void *nc){
             continue; 
         }
 
-        while(list_len > pushed_len || list_wrap == 1){
+        else if(list_len > pushed_len || list_wrap == 1){
             
             struct e1000_rx_desc desc;
             dma_addr_t base;
@@ -1122,8 +1122,9 @@ static void *push_to_guest(void *nc){
 
 
                     //pthread_mutex_unlock(&list_lock);
+                    pthread_mutex_unlock(&list_lock);
                     sched_yield();
-                    break; 
+                    continue; 
             }
 
 
