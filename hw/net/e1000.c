@@ -1120,7 +1120,8 @@ static void *push_to_guest(void *nc){
             }
 
 
-            printf("Total Size: %d\n", total_size);
+            if (total_size > 1518)
+                printf("Total Size: %d\n", total_size);
             usleep(10);
             do {
                 //desc_size: size to copy this round. 
