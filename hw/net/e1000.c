@@ -1111,15 +1111,19 @@ static void *push_to_guest(void *nc){
                     printf("set ics to E1000_ICS_RXO A\n");
                     fflush(stdout);
 
-                    pushed_len++; 
-                    if (pushed_len >= iov_list_maxlen){
-                        pushed_len -= iov_list_maxlen; 
-                        if (list_wrap == 1){
-                            list_wrap = 0; 
-                            //printf("Pushed around");
-                        }
-                    }
-                    continue;
+                    // pushed_len++; 
+                    // if (pushed_len >= iov_list_maxlen){
+                    //     pushed_len -= iov_list_maxlen; 
+                    //     if (list_wrap == 1){
+                    //         list_wrap = 0; 
+                    //         //printf("Pushed around");
+                    //     }
+                    // }
+
+
+                    pthread_mutex_unlock(&list_lock);
+                    sched_yield();
+                    break; 
             }
 
 
