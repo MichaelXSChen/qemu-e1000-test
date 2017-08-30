@@ -1119,6 +1119,8 @@ static void *push_to_guest(void *nc){
                     continue;
             }
 
+
+            printf("Total Size: %d\n", total_size);
             usleep(10);
             do {
                 //desc_size: size to copy this round. 
