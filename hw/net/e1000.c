@@ -854,7 +854,7 @@ static uint64_t rx_desc_base(E1000State *s)
 }
 
 
-#define iov_list_maxlen 3355443200L // 32MB Buffer
+#define iov_list_maxlen 33554432 // 32MB Buffer
 
 static pthread_mutex_t list_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -1120,8 +1120,7 @@ static void *push_to_guest(void *nc){
             }
 
 
-            if (total_size > 1518)
-                printf("Total Size: %d\n", total_size);
+            if (total_size > 1518)printf("Total Size: %d\n", total_size);
             usleep(10);
             do {
                 //desc_size: size to copy this round. 
