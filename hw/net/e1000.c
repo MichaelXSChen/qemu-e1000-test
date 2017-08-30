@@ -1119,7 +1119,7 @@ static void *push_to_guest(void *nc){
                     continue;
             }
 
-   
+            usleep(10);
             do {
                 //desc_size: size to copy this round. 
                 desc_size = total_size - desc_offset;
