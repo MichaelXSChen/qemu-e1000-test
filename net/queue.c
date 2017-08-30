@@ -191,6 +191,8 @@ ssize_t qemu_net_queue_send(NetQueue *queue,
 {
     ssize_t ret;
 
+    printf("net queue send, sender: %s, peer: %s\n", sender->name, sender->peer->name);
+
     if (queue->delivering || !qemu_can_send_packet(sender)) {
         qemu_net_queue_append(queue, sender, flags, data, size, sent_cb);
         return 0;
