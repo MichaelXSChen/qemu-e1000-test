@@ -1121,7 +1121,7 @@ static void *push_to_guest(void *nc){
                     // }
 
 
-                    pthread_mutex_unlock(&list_lock);
+                    //pthread_mutex_unlock(&list_lock);
                     sched_yield();
                     break; 
             }
