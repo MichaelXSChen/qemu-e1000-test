@@ -1108,6 +1108,9 @@ static void *push_to_guest(void *nc){
             total_size = size + e1000x_fcs_len(s->mac_reg);
             if (!e1000_has_rxbufs(s, total_size)) {
                     set_ics(s, 0, E1000_ICS_RXO);
+                    printf("set ics to E1000_ICS_RXO\n");
+                    fflush(stdout);
+
                     pushed_len++; 
                     if (pushed_len >= iov_list_maxlen){
                         pushed_len -= iov_list_maxlen; 
@@ -1185,6 +1188,8 @@ static void *push_to_guest(void *nc){
                     DBGOUT(RXERR, "RDH wraparound @%x, RDT %x, RDLEN %x\n",
                            rdh_start, s->mac_reg[RDT], s->mac_reg[RDLEN]);
                     set_ics(s, 0, E1000_ICS_RXO);
+                    printf("set ics to E1000_ICS_RXO\n");
+                    fflush(stdout);
                     pushed_len++; 
                     if (pushed_len >= iov_list_maxlen)
                     pushed_len -= iov_list_maxlen; 
