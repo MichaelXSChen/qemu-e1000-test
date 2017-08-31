@@ -357,11 +357,9 @@ static void *make_consensus(void *foo);
 static int myfd[2]; 
 
 
-static void rhandler(void * opaque){
-    //int i = *((int *)opaque);
-    printf("received\n");
-    return; 
-}
+static void rhandler(void * opaque);
+
+
 
 
 
@@ -377,7 +375,7 @@ static void e1000_reset(void *opaque)
 
 
 
-    qemu_set_fd_handler(myfd[0], rhandler, NULL, NULL); 
+    qemu_set_fd_handler(myfd[0], rhandler, NULL, opaque); 
 
 
 
@@ -874,9 +872,8 @@ static uint64_t rx_desc_base(E1000State *s)
 }
 
 
-static ssize_t send_to_guest(NetClientState *nc, const struct iovec *iov, int iovcnt){
+static ssize_t send_to_guest(E1000State *s, const struct iovec *iov, int iovcnt){
 
-    E1000State *s = qemu_get_nic_opaque(nc);
     PCIDevice *d = PCI_DEVICE(s);
     struct e1000_rx_desc desc;
     dma_addr_t base;
@@ -1065,29 +1062,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
             printf("[ERROR] buffer full\n");
         }
     }
-    ssize_t total_size = 0; 
-
-    while (consensus_head > buffer_tail || consensus_wrap == 1){
-        iov = &(iov_list[buffer_tail]);
-        iovcnt =  1; 
-        ssize_t ret; 
-        ret = send_to_guest(nc, iov, iovcnt);
-        if (ret >= 0)
-            total_size += ret; 
-        else
-            break;
-        buffer_tail++; 
-        //printf("guest : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
-
-        if ( buffer_tail >= iov_list_maxlen){
-            buffer_tail -= iov_list_maxlen;
-            if (consensus_wrap == 1){
-                consensus_wrap = 0;
-            }else{
-                printf("[ERROR] un-consensused full");
-            }
-        }
-    }
+    //ssize_t total_size = 0; 
     pthread_spin_unlock(&list_lock);
     return 100; 
 
@@ -1245,6 +1220,43 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
 }
 
 
+static void rhandler(void * opaque){
+    //int i = *((int *)opaque);
+    nc = (E1000State *)opaque; 
+
+    void buf[1024]; 
+    ssize_t ret = read(pipe[0], buf, 1024);
+    if (ret < 0){
+        printf("Error C\n");
+    }
+
+    struct iovec *iov; 
+    int iovcnt; 
+
+    pthread_spin_lock(&list_lock);
+    while (consensus_head > buffer_tail || consensus_wrap == 1){
+        iov = &(iov_list[buffer_tail]);
+        iovcnt =  1; 
+        ret = send_to_guest(nc, iov, iovcnt);
+        if (ret >= 0)
+            total_size += ret; 
+        else
+            break;
+        buffer_tail++; 
+        //printf("guest : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
+
+        if ( buffer_tail >= iov_list_maxlen){
+            buffer_tail -= iov_list_maxlen;
+            if (consensus_wrap == 1){
+                consensus_wrap = 0;
+            }else{
+                printf("[ERROR] un-consensused full");
+            }
+        }
+    }
+    pthread_spin_unlock(&list_lock);
+    return; 
+}
 
 
 
