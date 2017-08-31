@@ -1262,10 +1262,11 @@ static void *make_consensus(void *foo){
 
             usleep(10); //make consensus on consensus_head; 
 
-            int ret = write(myfd[1], &val++, sizeof(val));
+            int ret = write(myfd[1], val, sizeof(val));
             if (ret < 0){
                 printf("Error B\n");
             }
+            val++; 
 
             pthread_spin_lock(&list_lock);
             if (buffer_wrap == 0){
