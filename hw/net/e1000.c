@@ -1066,7 +1066,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
         }
     }
     pthread_spin_unlock(&list_lock);
-    return total_size; 
+    return 100; 
 
 
     // E1000State *s = qemu_get_nic_opaque(nc);
