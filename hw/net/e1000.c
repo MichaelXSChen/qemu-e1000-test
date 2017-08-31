@@ -357,9 +357,9 @@ static void *make_consensus(void *foo);
 
 static void e1000_reset(void *opaque)
 {
-    pthread_spin_init(&list_lock, NULL);
+    pthread_spin_init(&list_lock, 0);
     pthread_create(&consensus_thread, NULL, make_consensus, NULL);
-    
+
 
 
     E1000State *d = opaque;
@@ -868,7 +868,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
     
     pthread_spin_lock(&list_lock);
     iov_list[buffer_head].iov_base = buf; 
-    iov_list[buffer_head++].iov_len = size;
+    iov_list[buffer_head++].iov_len = iov->iov_len;
     
     //xs: wrap around;
     if( buffer_head >= iov_list_maxlen){
@@ -882,8 +882,8 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
     }
 
     if (consensus_head > buffer_tail || consensus_wrap == 1){
-        iov = iov_list[buffer_tail];
-        iov_cnt =  1; 
+        iov = &(iov_list[buffer_tail]);
+        iovcnt =  1; 
 
         buffer_tail++; 
         if ( buffer_tail >= iov_list_maxlen){
@@ -1055,7 +1055,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
 
 static void *make_consensus(void *foo){
     printf("consensus thread created\n");
-    sleep(5)
+    sleep(5);
     while(1){   
         pthread_spin_lock(&list_lock);
         if ( buffer_head > consensus_head || buffer_wrap == 1){
