@@ -357,9 +357,10 @@ static void *make_consensus(void *foo);
 static int myfd[2]; 
 
 
-void *rhandler(void * opaque){
-    int i = &(int *) opaque;
+static void rhandler(void * opaque){
+    int i = *((int *)opaque);
     printf("received %d\n", i);
+    return NULL; 
 }
 
 
@@ -369,7 +370,12 @@ static void e1000_reset(void *opaque)
     pthread_spin_init(&list_lock, 0);
     pthread_create(&consensus_thread, NULL, make_consensus, NULL);
 
-    pipe(myfd); 
+    int ret = pipe(myfd);   
+    if (ret < 0){
+        printf("Error A\n");
+    }
+
+
 
     qemu_set_fd_handler(myfd[0], rhandler, NULL, NULL); 
 
@@ -1257,7 +1263,9 @@ static void *make_consensus(void *foo){
             usleep(10); //make consensus on consensus_head; 
 
             int ret = write(myfd[1], &val++, sizeof(val));
-
+            if (ret < 0){
+                printf("Error B\n");
+            }
 
             pthread_spin_lock(&list_lock);
             if (buffer_wrap == 0){
