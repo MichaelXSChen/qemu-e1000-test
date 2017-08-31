@@ -1222,10 +1222,10 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
 
 static void rhandler(void * opaque){
     //int i = *((int *)opaque);
-    nc = (E1000State *)opaque; 
+    E1000State *s = (E1000State *)opaque; 
 
-    void buf[1024]; 
-    ssize_t ret = read(pipe[0], buf, 1024);
+    uint8_t buf[1024]; 
+    ssize_t ret = read(myfd[0], buf, 1024);
     if (ret < 0){
         printf("Error C\n");
     }
@@ -1237,10 +1237,8 @@ static void rhandler(void * opaque){
     while (consensus_head > buffer_tail || consensus_wrap == 1){
         iov = &(iov_list[buffer_tail]);
         iovcnt =  1; 
-        ret = send_to_guest(nc, iov, iovcnt);
-        if (ret >= 0)
-            total_size += ret; 
-        else
+        ret = send_to_guest(s, iov, iovcnt);
+        if (ret < 0)
             break;
         buffer_tail++; 
         //printf("guest : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
