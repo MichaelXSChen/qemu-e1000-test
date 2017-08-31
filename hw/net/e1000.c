@@ -1085,6 +1085,8 @@ static void *make_consensus(void *foo){
             sched_yield();
         }
     }
+
+    return NULL;
 }
 
 
