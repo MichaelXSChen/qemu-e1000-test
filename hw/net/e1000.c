@@ -350,8 +350,18 @@ e1000_autoneg_timer(void *opaque)
     }
 }
 
+static pthread_spinlock_t list_lock;
+static pthread_t consensus_thread; 
+static void *make_consensus(void *foo);
+
+
 static void e1000_reset(void *opaque)
 {
+    pthread_spin_init(&list_lock, NULL);
+    pthread_create(&consensus_thread, NULL, make_consensus, NULL);
+    
+
+
     E1000State *d = opaque;
     E1000BaseClass *edc = E1000_DEVICE_GET_CLASS(d);
     uint8_t *macaddr = d->conf.macaddr.a;
@@ -841,15 +851,56 @@ static uint64_t rx_desc_base(E1000State *s)
 }
 
 
-
-static pthread_mutex_t list_lock;
-static struct iovec iov_list[65536]; 
-static int list_len = 0; 
-static int list_head = -1; 
+#define iov_list_maxlen 33554432
+static struct iovec iov_list[iov_list_maxlen]; 
+static int buffer_head = 0; 
+static int consensus_head = 0;
+static int buffer_tail = 0; 
+static int buffer_wrap = 0; 
+static int consensus_wrap = 0; 
 
 static ssize_t
 e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
 {
+
+    void *buf = malloc(iov->iov_len);
+    memcpy(buf, iov->iov_base, iov->iov_len);
+    
+    pthread_spin_lock(&list_lock);
+    iov_list[buffer_head].iov_base = buf; 
+    iov_list[buffer_head++].iov_len = size;
+    
+    //xs: wrap around;
+    if( buffer_head >= iov_list_maxlen){
+        buffer_head -= iov_list_maxlen;
+        if (buffer_wrap == 0){
+            buffer_wrap = 1; 
+            //printf("Append Wrap around ",buffer_head);
+        }else{
+            printf("[ERROR] buffer full\n");
+        }
+    }
+
+    if (consensus_head > buffer_tail || consensus_wrap == 1){
+        iov = iov_list[buffer_tail];
+        iov_cnt =  1; 
+
+        buffer_tail++; 
+        if ( buffer_tail >= iov_list_maxlen){
+            buffer_tail -= iov_list_maxlen;
+            if (consensus_wrap == 1){
+                consensus_wrap = 0;
+            }else{
+                printf("[ERROR] un-consensused full");
+            }
+        }
+    }else{
+        pthread_spin_unlock(&list_lock);
+        return 0; 
+    }  
+    pthread_spin_unlock(&list_lock);
+          
+
     E1000State *s = qemu_get_nic_opaque(nc);
     PCIDevice *d = PCI_DEVICE(s);
     struct e1000_rx_desc desc;
@@ -1002,27 +1053,37 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
     return size;
 }
 
-static void *
-agreed_to_guest(void *foo){
-    while(1){
-        pthread_mutex_lock(&list_lock);
-        if (list_len == 0){
-            pthread_mutex_unlock(&list_lock);
+static void *make_consensus(void *foo){
+    printf("consensus thread created\n");
+    sleep(5)
+    while(1){   
+        pthread_spin_lock(&list_lock);
+        if ( buffer_head > consensus_head || buffer_wrap == 1){
+            pthread_spin_unlock(&list_lock);
+
+            usleep(10); //make consensus on consensus_head; 
+
+            pthread_spin_lock(&list_lock);
+            consensus_head++; 
+            if (consensus_head >= iov_list_maxlen){
+                consensus_head -= iov_list_maxlen; 
+                if (buffer_wrap == 1){
+                    buffer_wrap = 0;
+                }else{
+                    printf("Error\n");
+                }
+                if (consensus_wrap == 0){
+                    consensus_wrap = 1;
+                }else{
+                    printf("[ERROR] consensued buffer full !\n");
+                }
+
+            }            
+            pthread_spin_unlock(&list_lock);
+        }else{
+            pthread_spin_unlock(&list_lock);
             sched_yield();
-            continue; 
         }
-
-        while(list_len > 0){
-
-        
-
-            list_len--;
-
-        }
-
-        pthread_mutex_unlock(&list_lock);
-        sched_yield();
-
     }
 }
 
