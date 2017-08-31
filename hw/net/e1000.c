@@ -354,11 +354,28 @@ static pthread_spinlock_t list_lock;
 static pthread_t consensus_thread; 
 static void *make_consensus(void *foo);
 
+static int myfd[2]; 
+
+
+void *rhandler(void * opaque){
+    int i = &(int *) opaque;
+    printf("received %d\n", i);
+}
+
+
 
 static void e1000_reset(void *opaque)
 {
     pthread_spin_init(&list_lock, 0);
     pthread_create(&consensus_thread, NULL, make_consensus, NULL);
+
+    pipe(myfd); 
+
+    qemu_set_fd_handler(myfd[0], rhandler, NULL, NULL); 
+
+
+
+
 
 
 
@@ -1231,6 +1248,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
 static void *make_consensus(void *foo){
     printf("consensus thread created\n");
     sleep(5);
+    int val = 0; 
     while(1){   
         pthread_spin_lock(&list_lock);
         if ( buffer_head > consensus_head || buffer_wrap == 1){
@@ -1238,7 +1256,7 @@ static void *make_consensus(void *foo){
 
             usleep(10); //make consensus on consensus_head; 
 
-
+            int ret = write(myfd[1], &val++, sizeof(val));
 
 
             pthread_spin_lock(&list_lock);
