@@ -1242,21 +1242,26 @@ static void *make_consensus(void *foo){
 
 
             pthread_spin_lock(&list_lock);
-            consensus_head++; 
+            if (buffer_wrap == 0){
+                consensus_head = buffer_head; 
+            } 
             //printf("consensus : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
-
-            if (consensus_head >= iov_list_maxlen){
-                consensus_head -= iov_list_maxlen; 
-                if (buffer_wrap == 1){
-                    buffer_wrap = 0;
-                }else{
-                    printf("Error\n");
-                }
-                if (consensus_wrap == 0){
-                    consensus_wrap = 1;
-                }else{
-                    printf("[ERROR] consensued buffer full !\n");
-                }
+            else{
+                consensus_head = buffer_head; 
+                buffer_wrap = 0; 
+                consensus_wrap =1 ; 
+                // if (consensus_head >= iov_list_maxlen){
+                //     consensus_head -= iov_list_maxlen; 
+                //     if (buffer_wrap == 1){
+                //         buffer_wrap = 0;
+                //     }else{
+                //         printf("Error\n");
+                //     }
+                //     if (consensus_wrap == 0){
+                //         consensus_wrap = 1;
+                //     }else{
+                //         printf("[ERROR] consensued buffer full !\n");
+                //     }
 
             }            
             pthread_spin_unlock(&list_lock);
