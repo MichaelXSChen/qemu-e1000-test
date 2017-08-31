@@ -1146,16 +1146,17 @@ static void *make_consensus(void *foo){
             consensus_head++; 
             if (consensus_head >= iov_list_maxlen){
                 consensus_head -= iov_list_maxlen; 
-            if (buffer_wrap == 1){
-                buffer_wrap = 0;
-            }else{
-                printf("Error\n");
-            }
-            
-            if (consensus_wrap == 0){
-                consensus_wrap = 1;
-            }else{
-                printf("[ERROR] consensued buffer full !\n");
+                if (buffer_wrap == 1){
+                    buffer_wrap = 0;
+                }else{
+                    printf("Error\n");
+                }
+
+                if (consensus_wrap == 0){
+                    consensus_wrap = 1;
+                }else{
+                    printf("[ERROR] consensued buffer full !\n");
+                }
             }
 #endif
             pthread_spin_unlock(&list_lock);
