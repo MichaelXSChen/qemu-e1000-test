@@ -869,7 +869,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
     pthread_spin_lock(&list_lock);
     iov_list[buffer_head].iov_base = buf; 
     iov_list[buffer_head].iov_len = iov->iov_len;
-    printf("pushed to buffer : %d,%d,%d", buffer_tail,consensus_head,buffer_head);
+    printf("pushed to buffer : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
     buffer_head++;
 
     //xs: wrap around;
@@ -886,7 +886,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
     if (consensus_head > buffer_tail || consensus_wrap == 1){
         iov = &(iov_list[buffer_tail]);
         iovcnt =  1; 
-        printf("pushed to guest : %d,%d,%d", buffer_tail,consensus_head,buffer_head);
+        printf("pushed to guest : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
 
         buffer_tail++; 
         if ( buffer_tail >= iov_list_maxlen){
@@ -1067,7 +1067,7 @@ static void *make_consensus(void *foo){
             usleep(10); //make consensus on consensus_head; 
 
 
-            printf("consensus : %d,%d,%d", buffer_tail,consensus_head,buffer_head);
+            printf("consensus : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
 
 
             pthread_spin_lock(&list_lock);
