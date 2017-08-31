@@ -358,8 +358,8 @@ static int myfd[2];
 
 
 static void rhandler(void * opaque){
-    int i = *((int *)opaque);
-    printf("received %d\n", i);
+    //int i = *((int *)opaque);
+    printf("received\n");
     return; 
 }
 
