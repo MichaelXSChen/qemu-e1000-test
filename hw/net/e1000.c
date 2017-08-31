@@ -1024,13 +1024,13 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
 
     void *buf = malloc(iov->iov_len);
     memcpy(buf, iov->iov_base, iov->iov_len);
-    printf("here\n");
+    //printf("here\n");
 
     pthread_spin_lock(&list_lock);
     iov_list[buffer_head].iov_base = buf; 
     iov_list[buffer_head].iov_len = iov->iov_len;
     buffer_head++;
-    printf("buffer : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
+    //printf("buffer : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
 
     //xs: wrap around;
     if( buffer_head >= iov_list_maxlen){
@@ -1054,7 +1054,7 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
         else
             break;
         buffer_tail++; 
-        printf("guest : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
+        //printf("guest : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
 
         if ( buffer_tail >= iov_list_maxlen){
             buffer_tail -= iov_list_maxlen;
@@ -1243,7 +1243,7 @@ static void *make_consensus(void *foo){
 
             pthread_spin_lock(&list_lock);
             consensus_head++; 
-            printf("consensus : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
+            //printf("consensus : %d,%d,%d\n", buffer_tail,consensus_head,buffer_head);
 
             if (consensus_head >= iov_list_maxlen){
                 consensus_head -= iov_list_maxlen; 
