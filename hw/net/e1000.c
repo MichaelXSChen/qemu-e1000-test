@@ -360,7 +360,7 @@ static int myfd[2];
 static void rhandler(void * opaque){
     int i = *((int *)opaque);
     printf("received %d\n", i);
-    return NULL; 
+    return; 
 }
 
 
@@ -1262,7 +1262,7 @@ static void *make_consensus(void *foo){
 
             usleep(10); //make consensus on consensus_head; 
 
-            int ret = write(myfd[1], val, sizeof(val));
+            int ret = write(myfd[1], &val, sizeof(val));
             if (ret < 0){
                 printf("Error B\n");
             }
