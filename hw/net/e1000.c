@@ -1024,7 +1024,8 @@ e1000_receive_iov(NetClientState *nc, const struct iovec *iov, int iovcnt)
 
     void *buf = malloc(iov->iov_len);
     memcpy(buf, iov->iov_base, iov->iov_len);
-    
+    printf("here\n");
+
     pthread_spin_lock(&list_lock);
     iov_list[buffer_head].iov_base = buf; 
     iov_list[buffer_head].iov_len = iov->iov_len;
